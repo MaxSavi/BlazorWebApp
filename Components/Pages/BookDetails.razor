@@ -1,0 +1,123 @@
+﻿@* @page "/book/{id:int}"
+@using BlazorWebApp.Models
+@using BlazorWebApp.Data
+@using System
+
+<h3>Детали книги</h3>
+
+@if (Book != null)
+{
+    <div>
+        <img src="@($"data:image/png;base64,{Convert.ToBase64String(Book.Picture)}")" alt="Изображение книги" style="max-width: 200px;" />
+    </div>
+    <div>
+        <h4>@Book.Title</h4>
+        <p><strong>Автор:</strong> @Book.Author</p>
+        <p><strong>Описание:</strong> @GenerateRandomDescription()</p>
+    </div>
+}
+else
+{
+    <p>Книга не найдена</p>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private BookModel Book;
+
+    [Inject]
+    private BlazorWebAppContext _context { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Book = await _context.BookModel.FindAsync(Id);
+    }
+
+    private string GenerateRandomDescription()
+    {
+        string[] descriptions = {
+            "Увлекательная книга о приключениях",
+            "История о дружбе и семейных ценностях",
+            "Научно-популярная книга о будущем технологий",
+            "Фантастический роман о путешествиях во времени и пространстве"
+    };
+
+        Random rand = new Random();
+        return descriptions[rand.Next(descriptions.Length)];
+    }
+}
+ *@
+
+@page "/book/{id:int}"
+@rendermode InteractiveServer
+@using BlazorWebApp.Models
+@using BlazorWebApp.Data
+@using System
+@inject NavigationManager navManager
+
+<h3>Детали книги</h3>
+
+@if (Book != null)
+{
+    <div>
+        <img src="@($"data:image/png;base64,{Convert.ToBase64String(Book.Picture)}")" alt="Изображение книги" style="max-width: 200px;" />
+    </div>
+    <div>
+        <h4>@Book.Title</h4>
+        <p><strong>Автор:</strong> @Book.Author</p>
+        <p><strong>Описание:</strong> @GenerateRandomDescription()</p>
+    </div>
+    <div>
+        <button class="btn btn-primary" @onclick="BuyBook">Купить</button>
+        <button class="btn btn-secondary" @onclick="GoToMainPage">На главную</button>
+    </div>
+}
+else
+{
+    <p>Книга не найдена</p>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private BookModel Book;
+
+    [Inject]
+    private BlazorWebAppContext _context { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Book = await _context.BookModel.FindAsync(Id);
+    }
+
+    private string GenerateRandomDescription()
+    {
+        string[] descriptions = {
+            "Увлекательная книга о приключениях",
+            "История о дружбе и семейных ценностях",
+            "Научно-популярная книга о будущем технологий",
+            "Фантастический роман о путешествиях во времени и пространстве"
+        };
+
+        Random rand = new Random();
+        return descriptions[rand.Next(descriptions.Length)];
+    }
+
+    private async Task BuyBook()
+    {
+        if (Book != null)
+        {
+            _context.BookModel.Remove(Book);
+            await _context.SaveChangesAsync();
+            navManager.NavigateTo("/", true);
+        }
+    }
+
+    private void GoToMainPage()
+    {
+        navManager.NavigateTo("/", true);
+    }
+}

@@ -1,0 +1,199 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@* @using BlazorWebApp.Models
+@using BlazorWebApp.Data
+@using Microsoft.EntityFrameworkCore
+@using System.Linq
+
+<h3>Список книг</h3>
+
+<div class="input-group mb-3">
+    <input type="text" class="form-control" @bind="searchTerm" placeholder="Поиск по названию">
+    <div class="input-group-append">
+        <button class="btn btn-primary" @onclick="FilterBooks">Поиск</button>
+    </div>
+</div>
+
+@if (books != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Автор</th>
+                <th>Год публикации</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in filteredBooks)
+            {
+                <tr>
+                    <td>
+                        @if (item.Picture != null)
+                        {
+                            <img src="@($"data:image/png;base64,{Convert.ToBase64String(item.Picture)}")" alt="Изображение книги" style="max-width: 100px;" />
+                        }
+                        else
+                        {
+                            <span>No Image</span>
+                        }
+                    </td>
+                    <td>@item.Title</td>
+                    <td>@item.Author</td>
+                    <td>@item.YearOfPublication</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => BuyBook(item)">Купить</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Список книг пуст</p>
+}
+
+@code {
+    private List<BookModel> books;
+    private List<BookModel> filteredBooks;
+    private string searchTerm;
+
+    [Inject]
+    private BlazorWebAppContext _context { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooks();
+    }
+
+    private async Task LoadBooks()
+    {
+        books = await _context.BookModel.ToListAsync();
+        filteredBooks = books;
+    }
+
+    private async Task BuyBook(BookModel book)
+    {
+        _context.Remove(book);
+        await _context.SaveChangesAsync();
+        await LoadBooks(); // Обновление списка книг после удаления книги
+    }
+
+    private void FilterBooks()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredBooks = books;
+        }
+        else
+        {
+            string lowerSearchTerm = searchTerm.ToLower();
+            filteredBooks = books.Where(b => b.Title.ToLower().Contains(lowerSearchTerm)).ToList();
+        }
+    }
+} *@
+
+ @using BlazorWebApp.Models
+@using BlazorWebApp.Data
+@using Microsoft.EntityFrameworkCore
+@using System.Linq
+
+<h3>Список книг</h3>
+
+<div class="input-group mb-3">
+    <input type="text" class="form-control" @bind="searchTerm" placeholder="Поиск">
+    <div class="input-group-append">
+        <button class="btn btn-primary" @onclick="FilterBooks">Поиск</button>
+    </div>
+</div>
+
+@if (books != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Изображение</th>
+                <th>Название</th>
+                <th>Автор</th>
+                <th>Год публикации</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in filteredBooks)
+            {
+                <tr>
+                    <td>
+                        @if (item.Picture != null)
+                        {
+                            <img src="@($"data:image/png;base64,{Convert.ToBase64String(item.Picture)}")" alt="Изображение книги" style="max-width: 100px;" />
+                        }
+                        else
+                        {
+                            <span>No Image</span>
+                        }
+                    </td>
+                    <td>
+                        <!-- Изменение ссылки на название книги -->
+                        <a href="@($"book/{item.Id}")">@item.Title</a>
+                    </td>
+                    <td>@item.Author</td>
+                    <td>@item.YearOfPublication</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => BuyBook(item)">Купить</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Список книг пуст</p>
+}
+
+@code {
+    private List<BookModel> books;
+    private List<BookModel> filteredBooks;
+    private string searchTerm;
+
+    [Inject]
+    private BlazorWebAppContext _context { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooks();
+    }
+
+    private async Task LoadBooks()
+    {
+        books = await _context.BookModel.ToListAsync();
+        filteredBooks = books;
+    }
+
+    private async Task BuyBook(BookModel book)
+    {
+        _context.Remove(book);
+        await _context.SaveChangesAsync();
+        await LoadBooks(); // Обновление списка книг после удаления книги
+    }
+
+    private void FilterBooks()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredBooks = books;
+        }
+        else
+        {
+            string lowerSearchTerm = searchTerm.ToLower();
+            filteredBooks = books.Where(b =>
+                b.Title.ToLower().Contains(lowerSearchTerm) ||
+                b.Author.ToLower().Contains(lowerSearchTerm) ||
+                b.YearOfPublication.ToString().Contains(searchTerm)
+            ).ToList();
+        }
+    }
+}

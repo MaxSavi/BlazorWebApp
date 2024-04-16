@@ -1,0 +1,423 @@
+﻿@* @page "/counter"
+@rendermode InteractiveServer *@
+@* @rendermode InteractiveServer
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+} *@
+
+@* @using BlazorWebApp.Models
+@using BlazorWebApp.Data
+
+<h3>Добавление книги</h3>
+
+@if (isAdded)
+{
+    <p style="color: green;">Книга успешно добавлена!</p>
+}
+
+<form @onsubmit="AddBook">
+    <div class="form-group">
+        <label for="author">Автор:</label>
+        <input type="text" class="form-control" id="author" @bind="book.Author">
+    </div>
+    <div class="form-group">
+        <label for="title">Название:</label>
+        <input type="text" class="form-control" id="title" @bind="book.Title">
+    </div>
+    <div class="form-group">
+        <label for="year">Год публикации:</label>
+        <input type="text" class="form-control" id="year" @bind="book.YearOfPublication">
+    </div>
+    <button type="submit" class="btn btn-primary">Добавить</button>
+</form>
+
+@code {
+    private BookModel book = new BookModel();
+    private bool isAdded = false;
+
+    [Inject]
+    private BlazorWebAppContext _context { get; set; }
+
+    private async Task AddBook()
+    {
+        _context.BookModel.Add(book);
+        await _context.SaveChangesAsync();
+        isAdded = true;
+    }
+} *@
+
+@* @using BlazorWebApp.Models
+@using BlazorWebApp.Data
+@using Microsoft.EntityFrameworkCore
+
+<h3>Добавление книги</h3>
+
+@if (isAdded)
+{
+    <p style="color: green;">Книга успешно добавлена!</p>
+}
+
+<form @onsubmit="AddBook">
+    <div class="form-group">
+        <label for="author">Автор:</label>
+        <input type="text" class="form-control" id="author" @bind="book.Author">
+    </div>
+    <div class="form-group">
+        <label for="title">Название:</label>
+        <input type="text" class="form-control" id="title" @bind="book.Title">
+    </div>
+    <div class="form-group">
+        <label for="year">Год публикации:</label>
+        <input type="text" class="form-control" id="year" @bind="book.YearOfPublication">
+    </div>
+    <button type="submit" class="btn btn-primary">Добавить</button>
+</form>
+
+<h3>Список книг</h3>
+@if (books != null)
+{
+    <ul>
+        @foreach (var item in books)
+        {
+            <li>@item.Title by @item.Author, @item.YearOfPublication</li>
+        }
+    </ul>
+}
+
+@code {
+    private BookModel book = new BookModel();
+    private bool isAdded = false;
+    private List<BookModel> books;
+
+    [Inject]
+    private BlazorWebAppContext _context { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooks();
+    }
+
+    private async Task LoadBooks()
+    {
+        books = await _context.BookModel.ToListAsync();
+    }
+
+    private async Task AddBook()
+    {
+        _context.BookModel.Add(book);
+        await _context.SaveChangesAsync();
+        isAdded = true;
+        book = new BookModel(); // Сброс полей формы на новый экземпляр
+        await LoadBooks(); // Обновление списка книг после добавления новой книги
+    }
+} *@
+
+
+
+@* 
+@using BlazorWebApp.Models
+@using BlazorWebApp.Data
+@using Microsoft.EntityFrameworkCore
+
+<h3>Добавление/Редактирование книги</h3>
+
+@if (isAdded)
+{
+    <p style="color: green;">Книга успешно добавлена!</p>
+}
+
+<form @onsubmit="SaveBook">
+    <div class="form-group">
+        <label for="author">Автор:</label>
+        <input type="text" class="form-control" id="author" @bind="book.Author">
+    </div>
+    <div class="form-group">
+        <label for="title">Название:</label>
+        <input type="text" class="form-control" id="title" @bind="book.Title">
+    </div>
+    <div class="form-group">
+        <label for="year">Год публикации:</label>
+        <input type="text" class="form-control" id="year" @bind="book.YearOfPublication">
+    </div>
+    <button type="submit" class="btn btn-primary">@((editingBook != null) ? "Сохранить" : "Добавить")</button>
+    @if (editingBook != null)
+    {
+        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Отмена</button>
+    }
+</form>
+
+<h3>Список книг</h3>
+@if (books != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Автор</th>
+                <th>Год публикации</th>
+                <th>Действия</th> <!-- Новый заголовок для кнопок действий -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in books)
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Author</td>
+                    <td>@item.YearOfPublication</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditBook(item)">Редактировать</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteBook(item)">Удалить</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private BookModel book = new BookModel();
+    private BookModel editingBook;
+    private bool isAdded = false;
+    private List<BookModel> books;
+
+    [Inject]
+    private BlazorWebAppContext _context { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooks();
+    }
+
+    private async Task LoadBooks()
+    {
+        books = await _context.BookModel.ToListAsync();
+    }
+
+    private async Task AddBook()
+    {
+        _context.BookModel.Add(book);
+        await _context.SaveChangesAsync();
+        isAdded = true;
+        book = new BookModel(); // Сброс полей формы на новый экземпляр
+        await LoadBooks(); // Обновление списка книг после добавления новой книги
+    }
+
+    private async Task EditBook(BookModel selectedBook)
+    {
+        editingBook = selectedBook;
+        book = new BookModel
+            {
+                Author = selectedBook.Author,
+                Title = selectedBook.Title,
+                YearOfPublication = selectedBook.YearOfPublication
+            };
+    }
+
+    private async Task SaveBook()
+    {
+        if (editingBook != null)
+        {
+            editingBook.Author = book.Author;
+            editingBook.Title = book.Title;
+            editingBook.YearOfPublication = book.YearOfPublication;
+            _context.BookModel.Update(editingBook);
+        }
+        else
+        {
+            await AddBook();
+        }
+        await _context.SaveChangesAsync();
+        editingBook = null;
+        book = new BookModel(); // Сброс полей формы на пустые значения
+    }
+
+    private void CancelEdit()
+    {
+        editingBook = null;
+        book = new BookModel();
+    }
+
+    private async Task DeleteBook(BookModel book)
+    {
+        _context.BookModel.Remove(book);
+        await _context.SaveChangesAsync();
+        await LoadBooks(); // Обновление списка книг после удаления книги
+    }
+} *@
+@page "/adminPanel"
+@rendermode InteractiveServer
+@using BlazorWebApp.Models
+@using BlazorWebApp.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Forms
+@inject BlazorWebAppContext _context
+
+<h3>Добавление/Редактирование книги</h3>
+
+@if (isAdded || isEdited)
+{
+    <p style="color: green;">@(isAdded ? "Книга успешно добавлена!" : "Книга успешно изменена!")</p>
+}
+
+<form @onsubmit="SaveBook">
+    <div class="form-group">
+        <label for="author">Автор:</label>
+        <input type="text" class="form-control" id="author" @bind="book.Author">
+    </div>
+    <div class="form-group">
+        <label for="title">Название:</label>
+        <input type="text" class="form-control" id="title" @bind="book.Title">
+    </div>
+    <div class="form-group">
+        <label for="year">Год публикации:</label>
+        <input type="text" class="form-control" id="year" @bind="book.YearOfPublication">
+    </div>
+    <div class="form-group">
+        <label for="image">Изображение книги:</label>
+        <InputFile id="image" OnChange="HandleFileSelected" />
+    </div>
+    <button type="submit" class="btn btn-primary">@((editingBook != null) ? "Сохранить" : "Добавить")</button>
+    @if (editingBook != null)
+    {
+        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Отмена</button>
+    }
+</form>
+
+<h3>Список книг</h3>
+@if (books != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Изображение</th>
+                <th>Название</th>
+                <th>Автор</th>
+                <th>Год публикации</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in books)
+            {
+                <tr>
+                    <td>
+                        @if (item.Picture != null)
+                        {
+                            <img src="@($"data:image/png;base64,{Convert.ToBase64String(item.Picture)}")" alt="Изображение книги" style="max-width: 100px;" />
+                        }
+                        else
+                        {
+                            <span>No Image</span>
+                        }
+                    </td>
+                    <td>@item.Title</td>
+                    <td>@item.Author</td>
+                    <td>@item.YearOfPublication</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditBook(item)">Редактировать</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteBook(item)">Удалить</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private BookModel book = new BookModel();
+    private BookModel editingBook;
+    private bool isAdded = false;
+    private bool isEdited = false;
+    private List<BookModel> books;
+
+    private byte[] pictureBuffer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooks();
+    }
+
+    private async Task LoadBooks()
+    {
+        books = await _context.BookModel.ToListAsync();
+    }
+
+    private async Task SaveBook()
+    {
+        if (editingBook != null)
+        {
+            editingBook.Author = book.Author;
+            editingBook.Title = book.Title;
+            editingBook.YearOfPublication = book.YearOfPublication;
+            if (pictureBuffer != null)
+            {
+                editingBook.Picture = pictureBuffer;
+            }
+            _context.BookModel.Update(editingBook);
+            isEdited = true;
+            editingBook = null; // Добавим эту строку для сброса редактируемой книги
+        }
+        else
+        {
+            book.Picture = pictureBuffer;
+            _context.BookModel.Add(book);
+            isAdded = true;
+        }
+        await _context.SaveChangesAsync();
+        book = new BookModel();
+        await LoadBooks();
+        isAdded = false;
+        isEdited = false;
+        editingBook = null;
+    }
+
+    private async Task DeleteBook(BookModel book)
+    {
+        _context.BookModel.Remove(book);
+        await _context.SaveChangesAsync();
+        await LoadBooks();
+    }
+
+    private async Task EditBook(BookModel selectedBook)
+    {
+        editingBook = selectedBook;
+        book = new BookModel
+            {
+                Author = selectedBook.Author,
+                Title = selectedBook.Title,
+                YearOfPublication = selectedBook.YearOfPublication
+            };
+    }
+
+    private async Task CancelEdit()
+    {
+        editingBook = null;
+        book = new BookModel();
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var ms = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(ms);
+            pictureBuffer = ms.ToArray();
+        }
+    }
+}
