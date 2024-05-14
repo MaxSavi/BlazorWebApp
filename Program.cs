@@ -1,4 +1,5 @@
-﻿using BlazorWebApp.Components;
+﻿using BlazorWebApp;
+using BlazorWebApp.Components;
 using BlazorWebApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,7 @@ builder.Services.AddDbContext<BlazorWebAppContext>(options =>
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
+builder.Services.AddScoped<AuthService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
