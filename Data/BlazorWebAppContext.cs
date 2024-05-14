@@ -15,5 +15,6 @@ namespace BlazorWebApp.Data
         }
 
         public DbSet<BlazorWebApp.Models.BookModel> BookModel { get; set; } = default!;
+        public DbSet<UserModel> UserModel { get; set; }
     }
 }

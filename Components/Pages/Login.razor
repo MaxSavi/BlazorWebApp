@@ -1,0 +1,246 @@
+﻿@* @page "/login"
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime // Внедряем IJSRuntime
+
+<h1>Login</h1>
+
+@if (loginError != null)
+{
+    <p style="color:red;">@loginError</p>
+}
+
+<form @onsubmit="LoginUser">
+    <label>Email:</label><br />
+    <input type="email" @bind="email" required /><br />
+    <label>Password:</label><br />
+    <input type="password" @bind="password" required /><br />
+    <button type="submit">Login</button>
+</form>
+
+@code {
+    private string email;
+    private string password;
+    private string loginError;
+
+    private async Task LoginUser()
+    {
+        // Здесь должна быть логика входа пользователя
+        // Например, отправка данных на сервер для аутентификации
+        // В данном примере просто перенаправим пользователя на главную страницу после входа
+        // и сохраним информацию о входе в localStorage
+
+        // Используем IJSRuntime для вызова JavaScript-кода
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "userEmail", email);
+
+        NavigationManager.NavigateTo("/");
+    }
+} *@
+
+
+@* @page "/weather"
+@attribute [StreamRendering]
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<p>This component demonstrates showing data.</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate asynchronous loading to demonstrate streaming rendering
+        await Task.Delay(500);
+
+        var startDate = DateOnly.FromDateTime(DateTime.Now);
+        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        {
+            Date = startDate.AddDays(index),
+            TemperatureC = Random.Shared.Next(-20, 55),
+            Summary = summaries[Random.Shared.Next(summaries.Length)]
+        }).ToArray();
+    }
+
+    private class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+        public int TemperatureC { get; set; }
+        public string? Summary { get; set; }
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}
+ *@
+@* @page "/login"
+@page "/registration"
+
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Threading.Tasks
+
+@if (IsLogin)
+{
+    <h3>Авторизация</h3>
+    <EditForm Model="@loginModel" OnValidSubmit="Login">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label for="username">Имя пользователя:</label>
+            <InputText id="username" @bind-Value="@loginModel.Username" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <InputText id="password" @bind-Value="@loginModel.Password" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Войти</button>
+    </EditForm>
+    <p>Нет аккаунта? <a href="/registration">Зарегистрируйтесь</a>.</p>
+}
+else
+{
+    <h3>Регистрация</h3>
+    <EditForm Model="@registerModel" OnValidSubmit="Register">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label for="username">Имя пользователя:</label>
+            <InputText id="username" @bind-Value="@registerModel.Username" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <InputText id="password" @bind-Value="@registerModel.Password" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">Подтвердите пароль:</label>
+            <InputText id="confirmPassword" @bind-Value="@registerModel.ConfirmPassword" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+    </EditForm>
+    <p>Уже есть аккаунт? <a href="/login">Войдите</a>.</p>
+}
+
+@code {
+    private bool IsLogin = true;
+
+    private LoginModel loginModel = new LoginModel();
+    private RegisterModel registerModel = new RegisterModel();
+
+    private class LoginModel
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+
+    private class RegisterModel : LoginModel
+    {
+        public string ConfirmPassword { get; set; }
+    }
+
+    private async Task Login()
+    {
+        // Реализация логики входа пользователя
+        await ProtectedLocalStore.SetAsync("username", loginModel.Username);
+        await ProtectedLocalStore.SetAsync("password", loginModel.Password);
+
+        // Перенаправляем пользователя на другую страницу после успешного входа
+        // Например, используя NavigationManager
+        navigationManager.NavigateTo("/dashboard");
+    }
+
+    private async Task Register()
+    {
+        // Реализация логики регистрации нового пользователя
+        await ProtectedLocalStore.SetAsync("username", registerModel.Username);
+        await ProtectedLocalStore.SetAsync("password", registerModel.Password);
+
+        // Перенаправляем пользователя на страницу входа после успешной регистрации
+        // Например, используя NavigationManager
+        navigationManager.NavigateTo("/login");
+    }
+}
+ *@
+
+@page "/login"
+@using BlazorWebApp.Models
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<h1>Вход</h1>
+
+@if (ErrorMessage != null)
+{
+    <p style="color: red;">@ErrorMessage</p>
+}
+
+<EditForm Model="@UserModel" OnValidSubmit="LoginUser" formname="LoginForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label for="username">Имя пользователя:</label>
+    <InputText id="username" @bind-Value="UserModel.Username" />
+    <ValidationMessage For="@(() => UserModel.Username)" />
+
+    <label for="password">Пароль:</label>
+    <InputText id="password" @bind-Value="UserModel.Password" type="password" />
+    <ValidationMessage For="@(() => UserModel.Password)" />
+
+    <button type="submit">Войти</button>
+</EditForm>
+
+@code {
+    private string ErrorMessage { get; set; }
+    private UserModel UserModel { get; set; } = new UserModel();
+    private string username;
+    private string password;
+
+    private async Task LoginUser()
+    {
+        var isAuthenticated = await AuthService.AuthenticateAsync(username, password);
+        if (isAuthenticated)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            ErrorMessage = "Неверное имя пользователя или пароль";
+        }
+    }
+    // private async Task LoginUser()
+    // {
+    //     var success = await AuthService.AuthenticateAsync(UserModel);
+    //     if (success)
+    //         Navigation.NavigateTo("/");
+    //     else
+    //         ErrorMessage = "Неверное имя пользователя или пароль";
+    // }
+}
