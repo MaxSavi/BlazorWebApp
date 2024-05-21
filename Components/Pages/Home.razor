@@ -99,7 +99,12 @@ else
 @using BlazorWebApp.Data
 @using Microsoft.EntityFrameworkCore
 @using System.Linq
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage ProtectedLocalStore
+@inject AuthService AuthService
+@inject NavigationManager Navigation
 
+<button class="btn btn-secondary" @onclick="Exit">Выход из аккаунта</button>
 <h3>Список книг</h3>
 
 <div class="input-group mb-3">
@@ -162,9 +167,23 @@ else
     [Inject]
     private BlazorWebAppContext _context { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadBooks();
+        var results = await ProtectedLocalStore.GetAsync<string>("username");
+        var username = results.Success ? results.Value : "";
+        var resultss = await ProtectedLocalStore.GetAsync<string>("password");
+        var password = resultss.Success ? resultss.Value : "";
+        var isAuthenticated = await AuthService.AuthenticateAsync(username, password);
+        if (isAuthenticated)
+        {
+            await LoadBooks();
+            StateHasChanged();
+        }
+        else
+        {
+            Navigation.NavigateTo("/login");
+
+        }
     }
 
     private async Task LoadBooks()
@@ -195,5 +214,11 @@ else
                 b.YearOfPublication.ToString().Contains(searchTerm)
             ).ToList();
         }
+    }
+    private async void Exit()
+    {
+        await ProtectedLocalStore.DeleteAsync("username");
+        await ProtectedLocalStore.DeleteAsync("password");
+        StateHasChanged();
     }
 }

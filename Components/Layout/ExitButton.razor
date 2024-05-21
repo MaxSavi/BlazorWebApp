@@ -1,0 +1,13 @@
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage ProtectedLocalStore
+@rendermode InteractiveAuto
+
+<button class="btn btn-secondary" @onclick="Exit">Выход из аккаунта</button>
+
+@code {
+    private async void Exit()
+    {
+        await ProtectedLocalStore.DeleteAsync("username");
+        await ProtectedLocalStore.DeleteAsync("password");
+    }
+}

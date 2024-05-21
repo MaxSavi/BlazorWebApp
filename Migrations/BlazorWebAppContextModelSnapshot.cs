@@ -21,34 +21,34 @@ namespace BlazorWebApp.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BlazorWebApp.Models.BookModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+            //modelBuilder.Entity("BlazorWebApp.Models.BookModel", b =>
+            //    {
+            //        b.Property<int>("Id")
+            //            .ValueGeneratedOnAdd()
+            //            .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+            //        NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Author")
-                        .IsRequired()
-                        .HasColumnType("text");
+            //        b.Property<string>("Author")
+            //            .IsRequired()
+            //            .HasColumnType("text");
 
-                    b.Property<byte[]>("Picture")
-                        .IsRequired()
-                        .HasColumnType("bytea");
+            //        b.Property<byte[]>("Picture")
+            //            .IsRequired()
+            //            .HasColumnType("bytea");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
+            //        b.Property<string>("Title")
+            //            .IsRequired()
+            //            .HasColumnType("text");
 
-                    b.Property<string>("YearOfPublication")
-                        .IsRequired()
-                        .HasColumnType("text");
+            //        b.Property<string>("YearOfPublication")
+            //            .IsRequired()
+            //            .HasColumnType("text");
 
-                    b.HasKey("Id");
+            //        b.HasKey("Id");
 
-                    b.ToTable("BookModel");
-                });
+            //        b.ToTable("BookModel");
+            //    });
 
             modelBuilder.Entity("BlazorWebApp.Models.UserModel", b =>
                 {

@@ -68,7 +68,7 @@
 }
  *@
 
-@page "/registration"
+@* @page "/registration"
 @using BlazorWebApp.Models
 @inject AuthService AuthService
 @inject NavigationManager Navigation
@@ -119,4 +119,56 @@
     //     else
     //         ErrorMessage = "Пользователь с таким именем уже существует";
     // }
+}
+ *@
+
+@page "/registration"
+@rendermode InteractiveServer
+@using BlazorWebApp.Models
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<h1>Регистрация</h1>
+
+@if (ErrorMessage != null)
+{
+    <p style="color: red;">@ErrorMessage</p>
+}
+@* <input type="password" @bind="UserModel.Password" /> *@
+<label for="username">Имя пользователя:</label>
+<InputText id="username" @bind-Value="UserModel.Username" />
+<EditForm Model="@UserModel" OnValidSubmit="RegisterUser" formname="RegistrationForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    @* <label for="username">Имя пользователя:</label>
+    <InputText id="username" @bind-Value="UserModel.Username" /> *@
+    <ValidationMessage For="@(() => UserModel.Username)" />
+
+    <label for="password">Пароль:</label>
+    <input type="password" @bind="UserModel.Password"/>
+    <ValidationMessage For="@(() => UserModel.Password)" />
+
+    <button type="submit">Зарегистрироваться</button>
+</EditForm>
+
+@code {
+    private string ErrorMessage { get; set; }
+    private UserModel UserModel { get; set; } = new UserModel();
+
+    // Метод регистрации пользователя
+    private async Task RegisterUser()
+    {
+        if (string.IsNullOrEmpty(UserModel.Username) || string.IsNullOrEmpty(UserModel.Password))
+        {
+            ErrorMessage = "Имя пользователя и пароль обязательны для заполнения";
+            return;
+        }
+
+        var success = await AuthService.RegisterUserAsync(UserModel.Username, UserModel.Password);
+        if (success)
+            Navigation.NavigateTo("/login");
+        else
+            ErrorMessage = "Пользователь с таким именем уже существует";
+    }
 }
