@@ -191,7 +191,10 @@ else
  *@
 
 @page "/login"
+@rendermode InteractiveServer
 @using BlazorWebApp.Models
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage ProtectedLocalStore
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 
@@ -201,13 +204,14 @@ else
 {
     <p style="color: red;">@ErrorMessage</p>
 }
-
+<label for="username">Имя пользователя:</label>
+<InputText id="username" @bind-Value="UserModel.Username" />
 <EditForm Model="@UserModel" OnValidSubmit="LoginUser" formname="LoginForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <label for="username">Имя пользователя:</label>
-    <InputText id="username" @bind-Value="UserModel.Username" />
+    @* <label for="username">Имя пользователя:</label>
+    <InputText id="username" @bind-Value="UserModel.Username" /> *@
     <ValidationMessage For="@(() => UserModel.Username)" />
 
     <label for="password">Пароль:</label>
@@ -215,6 +219,7 @@ else
     <ValidationMessage For="@(() => UserModel.Password)" />
 
     <button type="submit">Войти</button>
+    <button class="btn btn-secondary" @onclick="GoToReg">Зарегестрироваться</button>
 </EditForm>
 
 @code {
@@ -225,15 +230,21 @@ else
 
     private async Task LoginUser()
     {
-        var isAuthenticated = await AuthService.AuthenticateAsync(username, password);
+        var isAuthenticated = await AuthService.AuthenticateAsync(UserModel.Username, UserModel.Password);
         if (isAuthenticated)
         {
+            await ProtectedLocalStore.SetAsync("username", UserModel.Username);
+            await ProtectedLocalStore.SetAsync("password", UserModel.Password);
             Navigation.NavigateTo("/");
         }
         else
         {
             ErrorMessage = "Неверное имя пользователя или пароль";
         }
+    }
+    private void GoToReg()
+    {
+        Navigation.NavigateTo("/registration", true);
     }
     // private async Task LoginUser()
     // {

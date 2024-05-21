@@ -89,7 +89,7 @@ namespace BlazorWebApp
                 return false; // Пользователь с таким именем уже существует
 
             // Создаем нового пользователя
-            var user = new UserModel { Username = username, Password = password };
+            var user = new UserModel { Id =0, Username = username, Password = password };
             _context.UserModel.Add(user);
             await _context.SaveChangesAsync();
             return true; // Регистрация успешна
@@ -98,7 +98,7 @@ namespace BlazorWebApp
         public async Task<bool> AuthenticateAsync(string username, string password)
         {
             // Получаем пользователя по имени
-            var user = await _context.UserModel.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.UserModel.FirstOrDefaultAsync(u => u.Username == username && u.Password == password);
 
             // Проверяем существует ли пользователь и совпадает ли его пароль
             return user != null && user.Password == password;

@@ -11,12 +11,12 @@ namespace BlazorWebApp.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<byte[]>(
-                name: "Picture",
-                table: "BookModel",
-                type: "bytea",
-                nullable: false,
-                defaultValue: new byte[0]);
+            //migrationBuilder.AddColumn<byte[]>(
+            //    name: "Picture",
+            //    table: "BookModel",
+            //    type: "bytea",
+            //    nullable: false,
+            //    defaultValue: new byte[0]);
 
             migrationBuilder.CreateTable(
                 name: "UserModel",
@@ -39,9 +39,9 @@ namespace BlazorWebApp.Migrations
             migrationBuilder.DropTable(
                 name: "UserModel");
 
-            migrationBuilder.DropColumn(
-                name: "Picture",
-                table: "BookModel");
+            //migrationBuilder.DropColumn(
+            //    name: "Picture",
+            //    table: "BookModel");
         }
     }
 }

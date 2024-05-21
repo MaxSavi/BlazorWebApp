@@ -13,8 +13,8 @@ namespace BlazorWebApp.Data
             : base(options)
         {
         }
-
+        public DbSet<BlazorWebApp.Models.UserModel> UserModel { get; set; } = default!;
         public DbSet<BlazorWebApp.Models.BookModel> BookModel { get; set; } = default!;
-        public DbSet<UserModel> UserModel { get; set; }
+        
     }
 }

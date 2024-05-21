@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@* @inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage ProtectedLocalStore
+@rendermode InteractiveAuto
 
 <div class="page">
     <div class="sidebar">
@@ -8,8 +11,9 @@
     <main>
         <div class="top-row px-4">
             <a href="http://stars.chromeexperiments.com/" target="_blank">About</a>
+            <ExitButton>Выход из аккаунта</ExitButton>
         </div>
-        @* https://learn.microsoft.com/aspnet/core/ *@
+        https://learn.microsoft.com/aspnet/core/
         <article class="content px-4">
             @Body
         </article>
@@ -21,3 +25,40 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+ *@
+@*  @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+ *@
+@inherits LayoutComponentBase
+@* @inject ProtectedLocalStorage ProtectedLocalStore
+@rendermode InteractiveAuto *@
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+@*             <button class="btn btn-secondary" @onclick="Exit">Выход из аккаунта</button>
+ *@       
+</div>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@* @code {
+    private async void Exit()
+    {
+        await ProtectedLocalStore.DeleteAsync("username");
+        await ProtectedLocalStore.DeleteAsync("password");
+    }
+}
+ *@

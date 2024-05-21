@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlazorWebApp.Migrations
 {
     [DbContext(typeof(BlazorWebAppContext))]
-    [Migration("20240514073849_AddUserModel")]
+    [Migration("20240514090924_AddUserModel")]
     partial class AddUserModel
     {
         /// <inheritdoc />

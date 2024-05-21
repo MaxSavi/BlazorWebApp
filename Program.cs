@@ -13,6 +13,8 @@ builder.Services.AddDbContext<BlazorWebAppContext>(options =>
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddScoped<AuthService>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
